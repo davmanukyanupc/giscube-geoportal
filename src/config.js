@@ -1,8 +1,37 @@
 import Options from './options.js'
 
-export default new Options({
+class Config extends Options {
+  get toolRoutes () {
+    let defaultTool = null
+    const routes = Object.keys(this.tools)
+      .filter(toolName => this.tools[toolName].panel)
+      .map(toolName => {
+        const tool = this.tools[toolName]
+
+        const route = {}
+        route.name = toolName
+        route.path = toolName + '/'
+        route.component = tool.panel
+
+        if (tool.default) {
+          if (defaultTool) {
+            console.error('Multiple default tools')
+          } else {
+            defaultTool = toolName
+          }
+        }
+        return route
+      })
+
+    if (defaultTool) {
+      routes.unshift({ path: '', redirect: { name: defaultTool } })
+    }
+    return routes
+  }
+}
+
+export default new Config({
   layout: {
-    /* components: { */
     header: () => import('components/AppHeader.vue'),
     geoportalMap: () => import('components/GeoportalMap.vue'),
     printHeader: () => import('components/PrintHeader.vue'),
@@ -21,11 +50,13 @@ export default new Options({
   tools: {
     catalog: {
       icon: 'ion-compass',
-      to: 'catalog'
+      to: 'catalog',
+      panel: () => import('components/CatalogPanel.vue')
     },
     contact: {
       icon: 'email',
-      to: 'contact'
+      to: 'contact',
+      panel: () => import('components/ContactPanel.vue')
     },
     fullscreen: {
       conditional () {
@@ -40,11 +71,14 @@ export default new Options({
     },
     home: {
       icon: 'home',
-      to: 'home'
+      to: 'home',
+      panel: () => import('components/HomePanel.vue'),
+      default: true
     },
     measure: {
       icon: 'mdi-ruler',
-      to: 'measure'
+      to: 'measure',
+      panel: () => import('components/MeasurePanel.vue')
     },
     print: {
       icon: 'print',
@@ -52,7 +86,8 @@ export default new Options({
     },
     search: {
       icon: 'search',
-      to: 'search'
+      to: 'search',
+      panel: () => import('components/SearchPanel.vue')
     }
   },
   catalog: {
