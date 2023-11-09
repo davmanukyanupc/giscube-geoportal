@@ -318,8 +318,9 @@ export default {
     },
     createGeoJSON (layer) {
       let geojson = layer.toGeoJSON()
-      geojson.properties = {
-        text: layer.sharedMessage
+      geojson.properties['text'] = layer.sharedMessage
+      if (layer.getRadius) {
+        geojson.properties['radius'] = layer.getRadius().toFixed(3)
       }
       return geojson
     },
